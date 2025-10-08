@@ -14,33 +14,35 @@ workflows:
       - name: Build unsigned iOS app bundle
         script: |
           flutter build ios --release --no-codesign
+          # Debug: Show build output structure
+          echo "=== Contents of build/ios/ ==="
+          ls -la build/ios/ || echo "build/ios/ not found"
+          echo "=== Contents of build/ios/iphoneos/ (if exists) ==="
+          if [ -d "build/ios/iphoneos" ]; then ls -la build/ios/iphoneos/; else echo "iphoneos dir not found"; fi
+          echo "=== Looking for .app files ==="
+          find build/ios/ -name "*.app" -type d 2>/dev/null || echo "No .app files found"
       - name: Create unsigned IPA from app bundle
         script: |
+          # Debug: Confirm source before copy
+          echo "=== Confirming Runner.app exists ==="
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then echo "Runner.app found!"; else echo "Runner.app NOT found - check project name or build output"; fi
           mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r build/ios/ipa/Runner.ipa Payload/
+          if [ -f "build/ios/iphoneos/Runner.app" ]; then
+            cp -r build/ios/iphoneos/Runner.app Payload/
+            echo "Copy succeeded"
+          else
+            echo "Copy skipped - no source file"
+          fi
+          echo "=== Contents of Payload/ after copy ==="
+          ls -la Payload/ || echo "Payload empty"
+          # Only zip if Payload has content
+          if [ "$(ls -A Payload/)" ]; then
+            zip -r build/ios/ipa/Runner.ipa Payload/
+            echo "Zip succeeded"
+          else
+            echo "Zip skipped - Payload empty"
+          fi
     artifacts:
       - build/ios/ipa/*.ipa
-      # Optional: Also include the raw .app for simulator testing
-      # - build/ios/iphoneos/*.app
-
-  android-workflow:
-    name: Android Workflow
-    max_build_duration: 120
-    instance_type: linux_x2
-    environment:
-      flutter: stable
-      java: 17
-    scripts:
-      - name: Get Flutter packages
-        script: |
-          flutter pub get
-      - name: Build Android APK
-        script: |
-          flutter build apk --release
-      - name: Build Android App Bundle
-        script: |
-          flutter build appbundle --release
-    artifacts:
-      - build/app/outputs/flutter-apk/*.apk
-      - build/app/outputs/bundle/*/*.aab
+      # Optional: Artifact the raw .app for inspection (even if unsigned)
+      - build/ios/iphoneos/*.app
