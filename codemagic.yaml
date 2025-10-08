@@ -29,6 +29,7 @@ workflows:
           cp -r "$APP_PATH" Payload/
           echo "Copied app bundle from $APP_PATH"
           if [ "$(ls -A Payload/)" ]; then
+            mkdir -p build/ios/ipa
             zip -r build/ios/ipa/Runner.ipa Payload/
             echo "IPA created successfully: build/ios/ipa/Runner.ipa"
           else
