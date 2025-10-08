@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
+import '../screens/ar_screen.dart';
 import '../screens/artworks/artwork_detail_screen.dart';
+import '../screens/vr_screen.dart';
 import '../widgets/main_navigation.dart';
 import 'constants.dart';
 
@@ -13,13 +15,25 @@ final appRouter = GoRouter(
       builder: (context, state) => const MainNavigation(),
     ),
 
-    // Détail d'une œuvre (seule route indépendante)
+    // Détail d'une œuvre
     GoRoute(
       path: '${AppConstants.artworkDetailRoute}/:id',
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return ArtworkDetailScreen(artworkId: id);
       },
+    ),
+
+    // Réalité Augmentée
+    GoRoute(
+      path: AppConstants.arRoute,
+      builder: (context, state) => const ARScreen(),
+    ),
+
+    // Réalité Virtuelle
+    GoRoute(
+      path: AppConstants.vrRoute,
+      builder: (context, state) => const VRScreen(),
     ),
   ],
 );

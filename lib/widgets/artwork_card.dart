@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../models/artwork.dart';
 import '../utils/app_theme.dart';
 import '../utils/constants.dart';
@@ -29,19 +28,12 @@ class ArtworkCard extends StatelessWidget {
             // Image
             Hero(
               tag: 'artwork_${artwork.id}',
-              child: CachedNetworkImage(
-                imageUrl: artwork.imageUrl,
+              child: Image.asset(
+                artwork.imageUrl,
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  height: 200,
-                  color: AppColors.lightSand,
-                  child: const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-                errorWidget: (context, url, error) => Container(
+                errorBuilder: (context, error, stackTrace) => Container(
                   height: 200,
                   color: AppColors.lightSand,
                   child: Column(

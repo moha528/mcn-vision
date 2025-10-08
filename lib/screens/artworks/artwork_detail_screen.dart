@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/artwork_service.dart';
@@ -69,16 +68,10 @@ class ArtworkDetailScreen extends StatelessWidget {
               ),
               background: Hero(
                 tag: 'artwork_${artwork.id}',
-                child: CachedNetworkImage(
-                  imageUrl: artwork.imageUrl,
+                child: Image.asset(
+                  artwork.imageUrl,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: AppColors.lightSand,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
+                  errorBuilder: (context, error, stackTrace) => Container(
                     color: AppColors.lightSand,
                     child: const Icon(
                       Icons.image_not_supported,

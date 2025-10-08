@@ -81,12 +81,14 @@ class HomeScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          localizations.discoverOurCollection,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.terracotta,
-                              ),
+                        Flexible(
+                          child: Text(
+                            localizations.discoverOurCollection,
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.terracotta,
+                                ),
+                          ),
                         ),
                         TextButton.icon(
                           onPressed: () {
@@ -102,7 +104,7 @@ class HomeScreen extends StatelessWidget {
 
                     // Scroll horizontal des œuvres récentes
                     SizedBox(
-                      height: 350,
+                      height: 420,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: recentArtworks.length,
@@ -210,6 +212,76 @@ class HomeScreen extends StatelessWidget {
                         onTap: () {
                           // Naviguer vers l'onglet scanner (index 2)
                           onNavigateToTab?.call(2);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.paddingSmall),
+
+                    // Carte Réalité Augmentée
+                    Card(
+                      child: ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.emerald.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.view_in_ar,
+                            color: AppColors.emerald,
+                            size: 32,
+                          ),
+                        ),
+                        title: Text(
+                          localizations.augmentedReality,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          localizations.arDescription,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          context.push(AppConstants.arRoute);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: AppConstants.paddingSmall),
+
+                    // Carte Réalité Virtuelle
+                    Card(
+                      child: ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.indigo.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.vrpano,
+                            color: AppColors.indigo,
+                            size: 32,
+                          ),
+                        ),
+                        title: Text(
+                          localizations.virtualReality,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          localizations.vrDescription,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          context.push(AppConstants.vrRoute);
                         },
                       ),
                     ),
