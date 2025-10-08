@@ -1,0 +1,4 @@
+scripts:
+  - name: Build unsigned iOS IPA
+    script: |
+      flutter build ipa --release --no-codesign
