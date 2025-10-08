@@ -1,19 +1,60 @@
 workflows:
+  # ==========================================
+  # iOS WORKFLOW - MCN Vision (AR enabled)
+  # ==========================================
   ios-workflow:
-    name: iOS Workflow
+    name: iOS Workflow (Unsigned - AR Ready)
     max_build_duration: 120
     instance_type: mac_mini_m1
+
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
+
+      vars:
+        # Bundle ID
+        BUNDLE_ID: "com.example.mcv_vision"
+        APP_NAME: "MCN Vision"
+
     scripts:
       - name: Get Flutter packages
         script: |
           flutter pub get
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+
+      - name: Verify AR Resources
+        script: |
+          echo "🔍 Checking AR Resources configuration..."
+          if [ -d "ios/Runner/Assets.xcassets/AR Resources.arresourcegroup" ]; then
+            echo "✅ AR Resources directory found"
+            ls -la "ios/Runner/Assets.xcassets/AR Resources.arresourcegroup/"
+
+            # Count reference images
+            IMAGE_COUNT=$(ls -1 "ios/Runner/Assets.xcassets/AR Resources.arresourcegroup" | grep ".arreferenceimage" | wc -l)
+            echo "📸 Found $IMAGE_COUNT AR reference images"
+
+            # List each reference image
+            for dir in ios/Runner/Assets.xcassets/AR\ Resources.arresourcegroup/*.arreferenceimage; do
+              if [ -d "$dir" ]; then
+                echo "  - $(basename "$dir")"
+                if [ -f "$dir/Contents.json" ]; then
+                  echo "    ✓ Contents.json present"
+                fi
+              fi
+            done
+          else
+            echo "❌ AR Resources directory NOT found!"
+            exit 1
+          fi
+
       - name: Build unsigned iOS app bundle
         script: |
           flutter build ios --release --no-codesign
+
       - name: Create unsigned IPA from app bundle
         script: |
           mkdir -p Payload
@@ -30,12 +71,242 @@ workflows:
           echo "Copied app bundle from $APP_PATH"
           if [ "$(ls -A Payload/)" ]; then
             mkdir -p build/ios/ipa
-            zip -r build/ios/ipa/Runner.ipa Payload/
-            echo "IPA created successfully: build/ios/ipa/Runner.ipa"
+            zip -r build/ios/ipa/MCN_Vision_unsigned.ipa Payload/
+            echo "✅ IPA created successfully: build/ios/ipa/MCN_Vision_unsigned.ipa"
+            ls -lh build/ios/ipa/
           else
             echo "Error: Payload still empty after copy"
             exit 1
           fi
+
     artifacts:
       - build/ios/ipa/*.ipa
-      - build/ios/iphoneos/*.app  # Optional: For raw bundle if needed
+      - build/ios/iphoneos/*.app
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
+
+  # ==========================================
+  # iOS WORKFLOW - With Code Signing (for App Store)
+  # ==========================================
+  ios-release-signed:
+    name: iOS Release Build (Signed)
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+
+      vars:
+        BUNDLE_ID: "com.example.mcv_vision"
+
+      # Configure iOS Code Signing in Codemagic UI
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.example.mcv_vision
+
+    scripts:
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios && pod install
+
+      - name: Verify AR Resources
+        script: |
+          echo "🔍 Checking AR Resources..."
+          ls -la "ios/Runner/Assets.xcassets/AR Resources.arresourcegroup/" || echo "⚠️  AR Resources not found"
+
+      - name: Build iOS IPA
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
+
+      # Uncomment to publish to App Store
+      # app_store_connect:
+      #   api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+      #   key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+      #   issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+      #   submit_to_testflight: true
+
+  # ==========================================
+  # ANDROID WORKFLOW - MCN Vision
+  # ==========================================
+  android-workflow:
+    name: Android Workflow
+    max_build_duration: 120
+    instance_type: linux_x2
+
+    environment:
+      flutter: stable
+      java: 17
+
+      vars:
+        PACKAGE_NAME: "com.example.mcv_vision"
+
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Build Android APK
+        script: |
+          flutter build apk --release
+
+      - name: Build Android App Bundle
+        script: |
+          flutter build appbundle --release
+
+    artifacts:
+      - build/app/outputs/**/*.apk
+      - build/app/outputs/**/*.aab
+      - build/app/outputs/**/mapping.txt
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
+
+  # ==========================================
+  # ANDROID WORKFLOW - With Code Signing
+  # ==========================================
+  android-release-signed:
+    name: Android Release Build (Signed)
+    max_build_duration: 120
+    instance_type: linux_x2
+
+    environment:
+      flutter: stable
+      java: 17
+
+      # Configure Android signing in Codemagic UI
+      android_signing:
+        - mcn_vision_keystore
+
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+
+      - name: Get Flutter packages
+        script: |
+          flutter pub get
+
+      - name: Build signed Android APK
+        script: |
+          flutter build apk --release
+
+      - name: Build signed Android App Bundle
+        script: |
+          flutter build appbundle --release
+
+    artifacts:
+      - build/app/outputs/**/*.apk
+      - build/app/outputs/**/*.aab
+      - build/app/outputs/**/mapping.txt
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+        notify:
+          success: true
+          failure: true
+
+      # Uncomment to publish to Google Play
+      # google_play:
+      #   credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+      #   track: internal
+      #   submit_as_draft: true
+
+# ==========================================
+# 📝 NOTES IMPORTANTES
+# ==========================================
+#
+# 🎯 AR FUNCTIONALITY (iOS uniquement)
+# ────────────────────────────────────────
+# ✅ AR Resources configurés dans: ios/Runner/Assets.xcassets/AR Resources.arresourcegroup/
+# ✅ 5 images de référence AR (ARTWORK_001 à ARTWORK_005)
+# ✅ Permissions ARKit dans Info.plist
+# ✅ Dépendances: arkit_plugin ^1.2.1, flutter_tts ^4.2.0
+#
+# ⚠️  ARKit nécessite un APPAREIL iOS PHYSIQUE (iPhone/iPad réel)
+# ⚠️  Ne fonctionne PAS sur simulateur
+# ⚠️  iOS 11.3+ minimum pour détection d'images AR
+#
+# 🔐 CODE SIGNING
+# ────────────────────────────────────────
+# iOS:
+#   - Workflow "ios-workflow" = Build SANS signature (pour test)
+#   - Workflow "ios-release-signed" = Build AVEC signature (pour déploiement)
+#   - Configurez certificats dans: Codemagic > Settings > Code signing identities
+#
+# Android:
+#   - Workflow "android-workflow" = Build debug/test
+#   - Workflow "android-release-signed" = Build signé pour Google Play
+#   - Créez keystore et uploadez dans Codemagic UI
+#
+# 🧪 TESTER LE MODE AR
+# ────────────────────────────────────────
+# 1. Buildez avec "ios-workflow" (unsigned)
+# 2. Signez manuellement l'IPA avec vos certificats
+# 3. Installez sur iPhone/iPad physique
+# 4. Imprimez les 5 images d'œuvres (assets/images/*.jpg)
+# 5. Dans l'app, allez dans "Réalité Augmentée"
+# 6. Pointez la caméra vers une image imprimée
+# 7. L'app devrait détecter l'œuvre et afficher les infos + narration
+#
+# 📦 WORKFLOWS DISPONIBLES
+# ────────────────────────────────────────
+# "ios-workflow"             → Build iOS rapide (unsigned) avec vérification AR
+# "ios-release-signed"       → Build iOS signé pour App Store/TestFlight
+# "android-workflow"         → Build Android APK + AAB (debug)
+# "android-release-signed"   → Build Android signé pour Google Play
+#
+# 🔧 COMMANDES UTILES
+# ────────────────────────────────────────
+# Lister les workflows disponibles:
+#   codemagic workflows list
+#
+# Déclencher un build spécifique:
+#   codemagic builds start --workflow=ios-workflow
+#
+# 📧 NOTIFICATIONS
+# ────────────────────────────────────────
+# Mettez à jour "your-email@example.com" avec votre vraie adresse email
+#
+# 🌐 PLUS D'INFOS
+# ────────────────────────────────────────
+# Documentation complète dans: CODEMAGIC_BUILD_GUIDE.md
