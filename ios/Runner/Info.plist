@@ -46,6 +46,10 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Cette application a besoin d'accéder à la caméra pour scanner les QR codes</string>
+	<string>Cette application a besoin d'accéder à la caméra pour scanner les QR codes et afficher du contenu en réalité augmentée</string>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 </dict>
 </plist>
