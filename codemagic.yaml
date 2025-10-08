@@ -14,35 +14,27 @@ workflows:
       - name: Build unsigned iOS app bundle
         script: |
           flutter build ios --release --no-codesign
-          # Debug: Show build output structure
-          echo "=== Contents of build/ios/ ==="
-          ls -la build/ios/ || echo "build/ios/ not found"
-          echo "=== Contents of build/ios/iphoneos/ (if exists) ==="
-          if [ -d "build/ios/iphoneos" ]; then ls -la build/ios/iphoneos/; else echo "iphoneos dir not found"; fi
-          echo "=== Looking for .app files ==="
-          find build/ios/ -name "*.app" -type d 2>/dev/null || echo "No .app files found"
       - name: Create unsigned IPA from app bundle
         script: |
-          # Debug: Confirm source before copy
-          echo "=== Confirming Runner.app exists ==="
-          if [ -d "build/ios/iphoneos/Runner.app" ]; then echo "Runner.app found!"; else echo "Runner.app NOT found - check project name or build output"; fi
           mkdir -p Payload
-          if [ -f "build/ios/iphoneos/Runner.app" ]; then
-            cp -r build/ios/iphoneos/Runner.app Payload/
-            echo "Copy succeeded"
+          APP_PATH=""
+          if [ -d "build/ios/iphoneos/Runner.app" ]; then
+            APP_PATH="build/ios/iphoneos/Runner.app"
+          elif [ -d "build/ios/Release-iphoneos/Runner.app" ]; then
+            APP_PATH="build/ios/Release-iphoneos/Runner.app"
           else
-            echo "Copy skipped - no source file"
+            echo "Error: No Runner.app found in expected paths"
+            exit 1
           fi
-          echo "=== Contents of Payload/ after copy ==="
-          ls -la Payload/ || echo "Payload empty"
-          # Only zip if Payload has content
+          cp -r "$APP_PATH" Payload/
+          echo "Copied app bundle from $APP_PATH"
           if [ "$(ls -A Payload/)" ]; then
             zip -r build/ios/ipa/Runner.ipa Payload/
-            echo "Zip succeeded"
+            echo "IPA created successfully: build/ios/ipa/Runner.ipa"
           else
-            echo "Zip skipped - Payload empty"
+            echo "Error: Payload still empty after copy"
+            exit 1
           fi
     artifacts:
       - build/ios/ipa/*.ipa
-      # Optional: Artifact the raw .app for inspection (even if unsigned)
-      - build/ios/iphoneos/*.app
+      - build/ios/iphoneos/*.app  # Optional: For raw bundle if needed
