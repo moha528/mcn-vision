@@ -92,6 +92,11 @@ class AppLocalizations {
   String get recentArtworks => translate('recent_artworks');
   String get comingSoon => translate('coming_soon');
   String get featuresComingSoon => translate('features_coming_soon');
+  String get arArtworkDetected => translate('ar_artwork_detected');
+  String get arListening => translate('ar_listening');
+  String get arTapToHear => translate('ar_tap_to_hear');
+  String get arPointCamera => translate('ar_point_camera');
+  String get arRecognitionActive => translate('ar_recognition_active');
 }
 
 class _AppLocalizationsDelegate

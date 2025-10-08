@@ -57,5 +57,10 @@
   "scan_now": "Scanner maintenant",
   "recent_artworks": "Œuvres récentes",
   "coming_soon": "Bientôt disponible",
-  "features_coming_soon": "Fonctionnalités à venir"
+  "features_coming_soon": "Fonctionnalités à venir",
+  "ar_artwork_detected": "Œuvre détectée",
+  "ar_listening": "Écoute de la description",
+  "ar_tap_to_hear": "Appuyez pour écouter la description",
+  "ar_point_camera": "Pointez la caméra vers une œuvre",
+  "ar_recognition_active": "Reconnaissance active"
 }

@@ -57,5 +57,10 @@
   "scan_now": "Scanner leegi",
   "recent_artworks": "Liggéey yu ñëw",
   "coming_soon": "Dinaa ñëw",
-  "features_coming_soon": "Ay fonctionnalité yu ñëw"
+  "features_coming_soon": "Ay fonctionnalité yu ñëw",
+  "ar_artwork_detected": "Liggéey bi am na",
+  "ar_listening": "Dañu ngi deglu description bi",
+  "ar_tap_to_hear": "Bësal ngir deglu description bi",
+  "ar_point_camera": "Bëgg camera bi ci liggéey bi",
+  "ar_recognition_active": "Reconnaissance dañu ngi def"
 }

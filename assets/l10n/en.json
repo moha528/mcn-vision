@@ -57,5 +57,10 @@
   "scan_now": "Scan now",
   "recent_artworks": "Recent artworks",
   "coming_soon": "Coming soon",
-  "features_coming_soon": "Upcoming features"
+  "features_coming_soon": "Upcoming features",
+  "ar_artwork_detected": "Artwork detected",
+  "ar_listening": "Listening to description",
+  "ar_tap_to_hear": "Tap to hear description",
+  "ar_point_camera": "Point camera at an artwork",
+  "ar_recognition_active": "Recognition active"
 }
